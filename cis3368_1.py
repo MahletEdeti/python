@@ -2,6 +2,7 @@ import mysql.connector
 from mysql.connector import Error
 
 
+# creating a connection
 def create_con(hostname, username, userpw, dbname):
     connection = None
     try:
@@ -21,6 +22,18 @@ conn = create_con('cis3368fall.cew5xs3nurup.us-east-2.rds.amazonaws.com', 'mwede
 cursor = conn.cursor()
 
 
+def execute_read_query(connection, query):
+    cursor = connection.cursor(dictionary=True)
+    result = None
+    try:
+        cursor.execute(query)
+        result = cursor.fetchall()
+        return result
+    except Error as e:
+        print(f'the {e} occurred')
+
+
+# output the Menu
 def menu_1():
     menu = """MENU
     a – Add travel log
@@ -36,7 +49,7 @@ def menu_1():
 def main():
     while True:
         option = input()
-        if option == 'a':
+        if option == 'a':  # if the user choose 'a' it will add an info
             travelyear = input("which year did you travel to?")
             tr_comment = input("Do you have any comment?")
             tr_revisit = input("Do you want to revisit?")
@@ -44,38 +57,23 @@ def main():
             value = (travelyear, tr_comment, tr_revisit)
             cursor.execute(sql, value)
             conn.commit()
-        elif option == 'd':
+        elif option == 'd':  # user can remove by using year
             sql = "DELETE FROM log WHERE year = %s"
             del_year = input("which year do you want to remove?")
             value_2 = (del_year,)
             cursor.execute(sql, value_2)
-            conn.commit()
         elif option == 'u':
-            new_amount = input("which year do you want to update?")
-            update_year_query = """
-            UPDATE year
-            SET year = %s
-            WHERE year > 1985""" % (new_amount)
-            execute_query(conn, update_year_query)
-
-            #sql = "UPDATE log SET year = %s WHERE year = %s"
-            #year_1 = input("which year do you want to update?")
-            #year_2 = input("To what year do you want to change it?")
-            #value_3 = (year_1, year_2)
-            #cursor.execute(sql, value_3)
-            #conn.commit()
+            year_1 = 2022
+            sql = "UPDATE log SET year = %s  WHERE  year > 2022" % year_1
+            cursor.execute(sql)
+            conn.commit()
         elif option == "o":
             cursor.execute("SELECT * FROM log")
             row = cursor.fetchall()
             for x in row:
                 print(x)
-        elif option == "s":
-            conn.commit()
-        elif option == "q":
-            print()
-            break
+
 
 
 print(menu_1())
 print(main())
-
